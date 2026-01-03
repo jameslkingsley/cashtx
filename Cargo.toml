@@ -1,0 +1,22 @@
+[package]
+name = "cashtx"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.100"
+base64 = "0.22.1"
+chrono = { version = "0.4.42", features = ["serde"] }
+clap = { version = "4.5.54", features = ["derive", "env"] }
+crossterm = "0.29.0"
+dotenvy = "0.15.7"
+http = "1.4.0"
+rapidfuzz = "0.5.0"
+regex = "1.12.2"
+reqwest = { version = "0.12.28", features = ["json"] }
+reqwest-middleware = { version = "0.4.2", features = ["json"] }
+reqwest-retry = "0.8.0"
+rust_decimal = "1.39.0"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.148"
+tokio = { version = "1.49.0", features = ["full"] }

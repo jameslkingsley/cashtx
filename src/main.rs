@@ -4,7 +4,7 @@ use std::{fmt::Display, io::stdin, ops::Div};
 
 use anyhow::Result;
 use base64::{Engine, prelude::BASE64_STANDARD};
-use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
+use chrono::{DateTime, Days, NaiveDate, NaiveDateTime, Utc};
 use clap::Parser;
 use regex::Regex;
 use reqwest::{
@@ -26,7 +26,10 @@ mod http;
 #[derive(Debug, Clone, Parser)]
 struct Args {
     #[arg(short, long)]
-    since: NaiveDate,
+    since: Option<NaiveDate>,
+
+    #[arg(long, default_value_t = false)]
+    cron: bool,
 
     #[clap(env = "SQUARE_SHIFT_EVENT_DESCRIPTION_EXCLUSIONS_PATTERN")]
     exclusions: String,
@@ -261,8 +264,17 @@ struct PaymentRequestObjectAccount {
 
 #[tokio::main]
 pub async fn main() -> Result<()> {
-    dotenvy::dotenv()?;
-    let args = Args::parse();
+    let _ = dotenvy::dotenv();
+    let mut args = Args::parse();
+
+    if args.cron {
+        let today = Utc::now();
+        args.since = today.date_naive().checked_sub_days(Days::new(1));
+    }
+
+    let Some(since) = args.since else {
+        return Ok(());
+    };
 
     let square = square_client(&args);
     let xero = xero_client(&args).await;
@@ -298,7 +310,7 @@ pub async fn main() -> Result<()> {
             ("location_id", &args.square_location_id),
             (
                 "begin_time",
-                &args.since.format("%Y-%m-%dT00:00:00.0000").to_string(),
+                &since.format("%Y-%m-%dT00:00:00.0000").to_string(),
             ),
         ])
         .send()

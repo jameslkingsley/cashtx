@@ -369,6 +369,11 @@ pub async fn main() -> Result<()> {
                     matched.push((shift.clone(), event, invoice));
                 }
                 InvoiceMatchResult::UnpaidMultiple(invoices) => {
+                    if args.cron {
+                        unmatched.push((shift.clone(), event));
+                        continue;
+                    }
+
                     match prompt_invoice_match(&shift, &event, &invoices) {
                         Some(inv) => {
                             matched.push((shift.clone(), event, inv));
